@@ -12,17 +12,19 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GraphTradeDto {
-    private Long tradeId;
-
-    private Long date;
-
-    private String type;
-
-    private BigDecimal quantity;
+public class GraphTradeResponseDto {
+    private Long id;
 
     private BigDecimal price;
 
-    private BigDecimal amount;
+    private BigDecimal qty;
+
+    private BigDecimal quoteQty;
+
+    private Long time;
+
+    private Boolean isBuyerMaker;
+
+    private Boolean isBestMatch;
 
 }
