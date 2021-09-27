@@ -45,8 +45,6 @@ public class GraphService {
 
         List<GraphTradeResponseDto> list = createRequest(DEFAULT_CURRENCY);
 
-        deleteTables();
-
         createTables();
 
         fillTable(list);
@@ -59,13 +57,10 @@ public class GraphService {
                 ResultSet result = stmt.executeQuery(String.format(SELECT_QUERY, getValueByCode(graphTimeCode)));
 
                 while (result.next()) {
-                    Long sec = result.getTime("bucket").getTime();
-                    LocalDateTime time =
-                            LocalDateTime.ofInstant(Instant.ofEpochSecond(sec),
-                                    TimeZone.getDefault().toZoneId());
+                    LocalDateTime sec = result.getTimestamp("bucket").toLocalDateTime();
 
                     GraphCandleDto candleDto = GraphCandleDto.builder()
-                            .time(time)
+                            .time(sec)
                             .max(result.getBigDecimal("max"))
                             .min(result.getBigDecimal("min"))
                             .first(result.getBigDecimal("first"))
@@ -123,11 +118,9 @@ public class GraphService {
         try (Connection conn = DriverManager.getConnection(CONN_URL)) {
             try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO graph (time, val) VALUES (?, ?)")) {
                 for (GraphTradeResponseDto rec : list) {
-                    LocalDateTime time =
-                            LocalDateTime.ofInstant(Instant.ofEpochSecond(rec.getTime()),
-                                    TimeZone.getDefault().toZoneId());
+                    LocalDateTime time = new Timestamp(rec.getTime()).toLocalDateTime();
 
-                    stmt.setTimestamp(1, Timestamp.valueOf(time));
+                    stmt.setTimestamp(1, new Timestamp(rec.getTime()));
                     stmt.setBigDecimal(2, rec.getPrice());
                     stmt.executeUpdate();
                 }
@@ -143,7 +136,6 @@ public class GraphService {
                 stmt.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;");
             }
         } catch (SQLException ex) {
-            System.err.println(ex.getMessage());
         }
 
         try (Connection conn = DriverManager.getConnection(CONN_URL)) {
@@ -152,7 +144,6 @@ public class GraphService {
 
             }
         } catch (SQLException ex) {
-            System.err.println(ex.getMessage());
         }
 
         try (Connection conn = DriverManager.getConnection(CONN_URL)) {
@@ -160,7 +151,6 @@ public class GraphService {
                 stmt.execute("SELECT create_hypertable('graph', 'time')");
             }
         } catch (SQLException ex) {
-            System.err.println(ex.getMessage());
         }
     }
 

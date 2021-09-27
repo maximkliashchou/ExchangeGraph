@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -21,5 +22,10 @@ public class GraphController {
     @PostMapping("/list/{code}")
     public List<GraphCandleDto> list(@PathVariable Integer code) {
         return graphService.list(code);
+    }
+
+    @PostMapping("/add")
+    public void add() throws IOException {
+        graphService.init();
     }
 }
